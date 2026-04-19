@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { getAuth } from "firebase/auth";
 import styles from "./PatentMindMap.module.css";
@@ -17,8 +17,10 @@ interface PatentMindMapProps {
 
 export default function PatentMindMap({ patentId }: PatentMindMapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    setError(null);
     if (!svgRef.current) return;
 
     const abortController = new AbortController();
@@ -59,7 +61,11 @@ export default function PatentMindMap({ patentId }: PatentMindMapProps) {
       }
     }
 
-    streamMindmap().catch(() => {});
+    streamMindmap().catch((err: unknown) => {
+      if (err instanceof Error && err.name !== "AbortError") {
+        setError("Failed to load mind map");
+      }
+    });
 
     return () => {
       abortController.abort();
@@ -124,6 +130,10 @@ export default function PatentMindMap({ patentId }: PatentMindMapProps) {
       .attr("font-size", 12)
       .text((d) => d.data.label);
   };
+
+  if (error) {
+    return <p className={styles.hint}>{error}</p>;
+  }
 
   return (
     <div className={styles.container}>
