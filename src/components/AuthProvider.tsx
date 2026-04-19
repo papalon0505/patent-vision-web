@@ -1,14 +1,21 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
-import { initializeApp, getApps, FirebaseApp } from "firebase/app";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import {
   getAuth,
-  signInWithPopup,
-  signOut,
   onAuthStateChanged,
+  signInWithPopup,
+  signOut as firebaseSignOut,
   GithubAuthProvider,
   GoogleAuthProvider,
+  User,
   Auth,
 } from "firebase/auth";
 
@@ -21,8 +28,26 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+function getFirebaseAuth(): Auth | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const app: FirebaseApp = getApps().length
+      ? getApp()
+      : initializeApp(firebaseConfig);
+    return getAuth(app);
+  } catch {
+    return null;
+  }
+}
+
+interface AuthUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+}
+
 interface AuthContextType {
-  user: { uid: string; email: string } | null;
+  user: AuthUser | null;
   loading: boolean;
   signInWithGithub: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -31,26 +56,53 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-let app: FirebaseApp;
-let auth: Auth;
-
-if (typeof window !== "undefined" && !getApps().length) {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Placeholder - full implementation would use React hooks
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const auth = getFirebaseAuth();
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
+      if (firebaseUser) {
+        setUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+        });
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const signInWithGithub = async () => {
+    const auth = getFirebaseAuth();
+    if (!auth) return;
+    await signInWithPopup(auth, new GithubAuthProvider());
+  };
+
+  const signInWithGoogle = async () => {
+    const auth = getFirebaseAuth();
+    if (!auth) return;
+    await signInWithPopup(auth, new GoogleAuthProvider());
+  };
+
+  const signOut = async () => {
+    const auth = getFirebaseAuth();
+    if (!auth) return;
+    await firebaseSignOut(auth);
+  };
+
   return (
-    <AuthContext.Provider
-      value={{
-        user: null,
-        loading: false,
-        signInWithGithub: async () => {},
-        signInWithGoogle: async () => {},
-        signOut: async () => {},
-      }}
-    >
+    <AuthContext.Provider value={{ user, loading, signInWithGithub, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );
