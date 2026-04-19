@@ -19,8 +19,8 @@ export default function AiSummary({ patentId, locale = "en" }: AiSummaryProps) {
       .then((result) => {
         setSummary(result.summary);
       })
-      .catch((err) => {
-        setError(err.message);
+      .catch((err: unknown) => {
+        setError(err instanceof Error ? err.message : "Failed to load summary");
       })
       .finally(() => {
         setLoading(false);

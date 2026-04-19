@@ -31,8 +31,7 @@ export async function searchPatents(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       query,
-      source: options?.source || "USPTO",
-      page: options?.page || 1,
+      sources: [options?.source || "USPTO"],
     }),
   });
 
