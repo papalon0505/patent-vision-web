@@ -29,7 +29,6 @@ export interface Patent {
 export interface SearchResult {
   patents: Patent[];
   total: number;
-  page: number;
 }
 
 export interface AiSummary {
