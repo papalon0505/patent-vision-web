@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
+import { getAuth } from "firebase/auth";
 import styles from "./PatentMindMap.module.css";
 
 interface MindMapNode {
@@ -20,42 +21,48 @@ export default function PatentMindMap({ patentId }: PatentMindMapProps) {
   useEffect(() => {
     if (!svgRef.current) return;
 
-    // SSE streaming from API
-    const eventSource = new EventSource(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/ai/mindmap/${patentId}`
-    );
+    const abortController = new AbortController();
 
-    let rootNode: MindMapNode | null = null;
-
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      
-      if (data.type === "start") {
-        rootNode = { id: "root", label: data.title || patentId };
-      } else if (data.type === "node" && rootNode) {
-        // Add node to tree
-        const newNode: MindMapNode = {
-          id: data.id,
-          label: data.label,
-        };
-        
-        if (!rootNode.children) {
-          rootNode.children = [];
+    async function streamMindmap() {
+      // EventSource doesn't support custom headers; use fetch with ReadableStream instead
+      let token = "";
+      try {
+        const currentUser = getAuth().currentUser;
+        if (currentUser) {
+          token = await currentUser.getIdToken();
         }
-        rootNode.children.push(newNode);
-        
-        renderMindMap(rootNode);
-      } else if (data.type === "done") {
-        eventSource.close();
+      } catch {
+        // Firebase not yet initialized; proceed without token
       }
-    };
 
-    eventSource.onerror = () => {
-      eventSource.close();
-    };
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${apiUrl}/api/ai/mindmap/${patentId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        signal: abortController.signal,
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      if (data.nodes && data.edges) {
+        // Convert flat nodes/edges to hierarchy for D3
+        const rootNode: MindMapNode = {
+          id: "root",
+          label: patentId,
+          children: (data.nodes as Array<{ id: string; label?: string; title?: string }>).map((n) => ({
+            id: n.id,
+            label: n.label ?? n.title ?? n.id,
+          })),
+        };
+        renderMindMap(rootNode);
+      }
+    }
+
+    streamMindmap().catch(() => {});
 
     return () => {
-      eventSource.close();
+      abortController.abort();
     };
   }, [patentId]);
 
