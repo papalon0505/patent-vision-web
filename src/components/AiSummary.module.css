@@ -1,0 +1,21 @@
+.loading,
+.error,
+.summary {
+  padding: 1rem;
+  line-height: 1.8;
+}
+
+.loading {
+  color: var(--muted);
+}
+
+.error {
+  color: #dc2626;
+  background: #fef2f2;
+  border-radius: 0.5rem;
+}
+
+.summary {
+  background: #f8fafc;
+  border-radius: 0.5rem;
+}

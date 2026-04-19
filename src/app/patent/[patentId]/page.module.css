@@ -1,0 +1,45 @@
+.main {
+  min-height: 100vh;
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.patent {
+  background: white;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  padding: 2rem;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 1.5rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.meta {
+  display: flex;
+  gap: 1rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.section h2 {
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+}
+
+.section p {
+  line-height: 1.8;
+}
