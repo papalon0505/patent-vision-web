@@ -58,9 +58,8 @@ export async function searchPatents(
 }
 
 export async function getPatent(patentId: string): Promise<Patent> {
-  const res = await fetch(`${API_URL}/api/patent/${patentId}`, {
-    headers: await authHeader(),
-  });
+  // Called from Next.js Server Component — no Firebase token available server-side
+  const res = await fetch(`${API_URL}/api/patent/${patentId}`);
 
   if (!res.ok) {
     throw new Error(`Patent not found: ${patentId}`);

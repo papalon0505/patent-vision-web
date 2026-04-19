@@ -1,6 +1,6 @@
 import AiSummary from "@/components/AiSummary";
 import PatentMindMap from "@/components/PatentMindMap";
-import { getPatent, getAiSummary } from "@/lib/api";
+import { getPatent } from "@/lib/api";
 import styles from "./page.module.css";
 
 interface PatentPageProps {
