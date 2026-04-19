@@ -1,4 +1,19 @@
+import { getAuth } from "firebase/auth";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+async function authHeader(): Promise<Record<string, string>> {
+  try {
+    const user = getAuth().currentUser;
+    if (user) {
+      const token = await user.getIdToken();
+      return { Authorization: `Bearer ${token}` };
+    }
+  } catch {
+    // Firebase not initialized yet
+  }
+  return {};
+}
 
 export interface Patent {
   patent_id: string;
@@ -24,11 +39,11 @@ export interface AiSummary {
 
 export async function searchPatents(
   query: string,
-  options?: { source?: string; page?: number }
+  options?: { source?: string }
 ): Promise<SearchResult> {
   const res = await fetch(`${API_URL}/api/search`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeader()) },
     body: JSON.stringify({
       query,
       sources: [options?.source || "USPTO"],
@@ -43,7 +58,9 @@ export async function searchPatents(
 }
 
 export async function getPatent(patentId: string): Promise<Patent> {
-  const res = await fetch(`${API_URL}/api/patent/${patentId}`);
+  const res = await fetch(`${API_URL}/api/patent/${patentId}`, {
+    headers: await authHeader(),
+  });
 
   if (!res.ok) {
     throw new Error(`Patent not found: ${patentId}`);
@@ -58,7 +75,7 @@ export async function getAiSummary(
 ): Promise<AiSummary> {
   const res = await fetch(`${API_URL}/api/ai/summary`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeader()) },
     body: JSON.stringify({ patent_id: patentId, locale }),
   });
 
