@@ -15,19 +15,24 @@ async function authHeader(): Promise<Record<string, string>> {
   return {};
 }
 
-export interface Patent {
+export interface PatentSummary {
   patent_id: string;
   title: string;
   assignee: string | null;
   abstract: string | null;
   filing_date: string | null;
   status: string;
-  jurisdiction: string;
+  source: string;
+}
+
+export interface Patent extends PatentSummary {
+  jurisdiction: string | null;
   cpc_classes: string[];
+  publication_date: string | null;
 }
 
 export interface SearchResult {
-  patents: Patent[];
+  patents: PatentSummary[];
   total: number;
 }
 

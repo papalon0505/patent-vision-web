@@ -4,11 +4,11 @@ import { useState } from "react";
 import SearchBar from "@/components/SearchBar";
 import PatentCard from "@/components/PatentCard";
 import { searchPatents } from "@/lib/api";
-import type { Patent } from "@/lib/api";
+import type { PatentSummary } from "@/lib/api";
 import styles from "./page.module.css";
 
 export default function Home() {
-  const [results, setResults] = useState<Patent[]>([]);
+  const [results, setResults] = useState<PatentSummary[]>([]);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,7 +20,7 @@ export default function Home() {
       const data = await searchPatents(query);
       setResults(data.patents);
     } catch {
-      setError("搜尋失敗，請稍後再試");
+      setError("Search failed. Please try again.");
     } finally {
       setSearching(false);
     }
@@ -30,12 +30,12 @@ export default function Home() {
     <main className={styles.main}>
       <header className={styles.header}>
         <h1>PatentVision</h1>
-        <p>AI 驅動專利視覺化分析平台</p>
+        <p>AI-powered patent visualization and analysis</p>
       </header>
 
       <SearchBar onSearch={handleSearch} />
 
-      {searching && <p className={styles.loading}>搜尋中...</p>}
+      {searching && <p className={styles.loading}>Searching...</p>}
       {error && <p className={styles.error}>{error}</p>}
 
       <section className={styles.results}>

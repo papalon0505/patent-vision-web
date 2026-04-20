@@ -9,7 +9,7 @@ interface PatentPageProps {
 
 export default async function PatentPage({ params }: PatentPageProps) {
   const patent = await getPatent(params.patentId).catch(() => null);
-  
+
   if (!patent) {
     return (
       <main className={styles.main}>
@@ -28,19 +28,19 @@ export default async function PatentPage({ params }: PatentPageProps) {
             <span>{patent.assignee}</span>
           </div>
         </header>
-        
+
         <section className={styles.section}>
-          <h2>摘要</h2>
+          <h2>Abstract</h2>
           <p>{patent.abstract}</p>
         </section>
-        
+
         <section className={styles.section}>
-          <h2>AI 摘要</h2>
+          <h2>AI Summary</h2>
           <AiSummary patentId={patent.patent_id} />
         </section>
-        
+
         <section className={styles.section}>
-          <h2>技術心智圖</h2>
+          <h2>Technology Mind Map</h2>
           <PatentMindMap patentId={patent.patent_id} />
         </section>
       </article>

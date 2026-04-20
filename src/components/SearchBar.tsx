@@ -20,12 +20,12 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
       <input
         type="text"
         className={styles.input}
-        placeholder="搜尋專利..."
+        placeholder="Search patents..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
       <button type="submit" className={styles.button}>
-        搜尋
+        Search
       </button>
     </form>
   );
