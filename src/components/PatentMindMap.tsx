@@ -143,7 +143,7 @@ export default function PatentMindMap({ patentId }: PatentMindMapProps) {
   return (
     <div className={styles.container}>
       <svg ref={svgRef} className={styles.svg} />
-      {loading && <p className={styles.hint}>載入中...</p>}
+      {loading && <p className={styles.hint}>Loading...</p>}
     </div>
   );
 }

@@ -27,7 +27,7 @@ export default function AiSummary({ patentId }: AiSummaryProps) {
   }, [patentId]);
 
   if (loading) {
-    return <p className={styles.loading}>產生摘要中...</p>;
+    return <p className={styles.loading}>Generating summary...</p>;
   }
 
   if (error) {
