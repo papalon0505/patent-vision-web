@@ -1,14 +1,6 @@
 import Link from "next/link";
+import type { Patent } from "@/lib/api";
 import styles from "./PatentCard.module.css";
-
-export interface Patent {
-  patent_id: string;
-  title: string;
-  assignee: string | null;
-  abstract: string | null;
-  filing_date: string | null;
-  status: string;
-}
 
 interface PatentCardProps {
   patent: Patent;
