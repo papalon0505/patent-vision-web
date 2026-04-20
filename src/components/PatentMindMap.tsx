@@ -18,15 +18,16 @@ interface PatentMindMapProps {
 export default function PatentMindMap({ patentId }: PatentMindMapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setError(null);
+    setLoading(true);
     if (!svgRef.current) return;
 
     const abortController = new AbortController();
 
     async function streamMindmap() {
-      // EventSource doesn't support custom headers; use fetch with ReadableStream instead
       let token = "";
       try {
         const currentUser = getAuth().currentUser;
@@ -38,17 +39,19 @@ export default function PatentMindMap({ patentId }: PatentMindMapProps) {
       }
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const response = await fetch(`${apiUrl}/api/ai/mindmap/${patentId}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        signal: abortController.signal,
-      });
+      const response = await fetch(
+        `${apiUrl}/api/ai/mindmap/${encodeURIComponent(patentId)}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          signal: abortController.signal,
+        }
+      );
 
       if (!response.ok) return;
 
       const data = await response.json();
 
       if (data.nodes && data.edges) {
-        // Convert flat nodes/edges to hierarchy for D3
         const rootNode: MindMapNode = {
           id: "root",
           label: patentId,
@@ -59,12 +62,14 @@ export default function PatentMindMap({ patentId }: PatentMindMapProps) {
         };
         renderMindMap(rootNode);
       }
+      setLoading(false);
     }
 
     streamMindmap().catch((err: unknown) => {
       if (err instanceof Error && err.name !== "AbortError") {
         setError("Failed to load mind map");
       }
+      setLoading(false);
     });
 
     return () => {
@@ -138,7 +143,7 @@ export default function PatentMindMap({ patentId }: PatentMindMapProps) {
   return (
     <div className={styles.container}>
       <svg ref={svgRef} className={styles.svg} />
-      <p className={styles.hint}>載入中...</p>
+      {loading && <p className={styles.hint}>載入中...</p>}
     </div>
   );
 }
