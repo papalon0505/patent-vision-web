@@ -6,16 +6,15 @@ import styles from "./AiSummary.module.css";
 
 interface AiSummaryProps {
   patentId: string;
-  locale?: string;
 }
 
-export default function AiSummary({ patentId, locale = "en" }: AiSummaryProps) {
+export default function AiSummary({ patentId }: AiSummaryProps) {
   const [summary, setSummary] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getAiSummary(patentId, locale)
+    getAiSummary(patentId)
       .then((result) => {
         setSummary(result.summary);
       })
@@ -25,7 +24,7 @@ export default function AiSummary({ patentId, locale = "en" }: AiSummaryProps) {
       .finally(() => {
         setLoading(false);
       });
-  }, [patentId, locale]);
+  }, [patentId]);
 
   if (loading) {
     return <p className={styles.loading}>產生摘要中...</p>;

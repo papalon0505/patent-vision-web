@@ -67,14 +67,11 @@ export async function getPatent(patentId: string): Promise<Patent> {
   return res.json();
 }
 
-export async function getAiSummary(
-  patentId: string,
-  locale: string = "en"
-): Promise<AiSummary> {
+export async function getAiSummary(patentId: string): Promise<AiSummary> {
   const res = await fetch(`${API_URL}/api/ai/summary`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...(await authHeader()) },
-    body: JSON.stringify({ patent_id: patentId, locale }),
+    body: JSON.stringify({ patent_id: patentId }),
   });
 
   if (!res.ok) {
